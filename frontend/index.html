@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-Powered Market Intelligence Platform — Real-time news analysis, sentiment tracking, and trend detection.">
+    <title>Market Intelligence | AI-Powered Analytics</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- Toast Notifications -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Mobile Menu Toggle -->
+<button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()">☰</button>
+
+<div class="app-container">
+
+    <!-- ═══ Sidebar ═══ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h1><span class="brand-icon">🧠</span> Market Intel</h1>
+            <p>AI-Powered Analytics</p>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+                <span class="nav-icon">📊</span> Dashboard
+            </div>
+            <div class="nav-item" data-page="trends" onclick="navigate('trends')">
+                <span class="nav-icon">🔥</span> Trends
+            </div>
+            <div class="nav-item" data-page="insights" onclick="navigate('insights')">
+                <span class="nav-icon">💡</span> Insights
+            </div>
+            <div class="nav-item" data-page="search" onclick="navigate('search')">
+                <span class="nav-icon">🔍</span> Search
+            </div>
+            <div class="nav-item" data-page="analytics" onclick="navigate('analytics')">
+                <span class="nav-icon">📈</span> Analytics
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="db-status">
+                <span class="status-dot" id="dbStatusDot"></span>
+                <span id="dbStatusText">Checking...</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══ Main Content ═══ -->
+    <main class="main-content">
+
+        <!-- ━━━ Dashboard Page ━━━ -->
+        <section class="page-section active" id="page-dashboard">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <p>Real-time market intelligence overview</p>
+            </div>
+
+            <!-- Ingest Form -->
+            <div class="ingest-form">
+                <input type="text" id="ingestQuery" placeholder="Enter topic (e.g., artificial intelligence)" style="flex:1; min-width:200px">
+                <input type="number" id="ingestCount" placeholder="Articles" value="50" min="1" max="100" style="width:100px">
+                <button class="btn btn-primary" id="ingestBtn" onclick="ingestData()">
+                    ⚡ Ingest Data
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid" id="dashStats">
+                <div class="stat-card blue">
+                    <div class="stat-icon blue">📰</div>
+                    <div class="stat-info">
+                        <h3 id="statTotal">—</h3>
+                        <p>Total Articles</p>
+                    </div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-icon green">🕐</div>
+                    <div class="stat-info">
+                        <h3 id="statRecent">—</h3>
+                        <p>Last 24 Hours</p>
+                    </div>
+                </div>
+                <div class="stat-card amber">
+                    <div class="stat-icon amber">📈</div>
+                    <div class="stat-info">
+                        <h3 id="statTrend">—</h3>
+                        <p>Avg Trend Score</p>
+                    </div>
+                </div>
+                <div class="stat-card rose">
+                    <div class="stat-icon rose">😊</div>
+                    <div class="stat-info">
+                        <h3 id="statSentiment">—</h3>
+                        <p>Avg Sentiment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📈 Articles Over Time</span>
+                        <span class="card-badge badge-blue">7 Days</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="timeSeriesChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">😊 Sentiment Distribution</span>
+                        <span class="card-badge badge-green">Overview</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trending Keywords -->
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🔥 Trending Keywords</span>
+                    <span class="card-badge badge-amber">Top 20</span>
+                </div>
+                <div class="keyword-cloud" id="dashKeywords">
+                    <div class="loading">Loading trends</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ━━━ Trends Page ━━━ -->
+        <section class="page-section" id="page-trends">
+            <div class="page-header">
+                <h2>Trends</h2>
+                <p>Keyword trend analysis across time periods</p>
+            </div>
+
+            <div class="card-header" style="margin-bottom:1.5rem">
+                <span></span>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="24h" onclick="loadTrends('24h')">24H</button>
+                    <button class="period-btn" data-period="7d" onclick="loadTrends('7d')">7D</button>
+                    <button class="period-btn" data-period="30d" onclick="loadTrends('30d')">30D</button>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📊 Keyword Frequency</span>
+                    </div>
+                    <div class="chart-container" style="height:350px">
+                        <canvas id="trendsBarChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🏷️ Keyword Cloud</span>
+                    </div>
+                    <div class="keyword-cloud" id="trendsKeywords" style="min-height:200px">
+                        <div class="loading">Loading</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📋 Detailed Keyword Table</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Keyword</th>
+                            <th>Count</th>
+                            <th>Trend Score</th>
+                            <th>Sentiment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trendsTable">
+                        <tr><td colspan="5" class="loading">Loading</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ━━━ Insights Page ━━━ -->
+        <section class="page-section" id="page-insights">
+            <div class="page-header">
+                <h2>Insights</h2>
+                <p>Sentiment analysis and market intelligence summary</p>
+            </div>
+
+            <div class="card-header" style="margin-bottom:1.5rem">
+                <span></span>
+                <div class="period-selector">
+                    <button class="period-btn active" data-period="24h" onclick="loadInsights('24h')">24H</button>
+                    <button class="period-btn" data-period="7d" onclick="loadInsights('7d')">7D</button>
+                    <button class="period-btn" data-period="30d" onclick="loadInsights('30d')">30D</button>
+                </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="card" style="margin-bottom:1.5rem">
+                <div class="card-header">
+                    <span class="card-title">📝 AI Summary</span>
+                </div>
+                <div class="summary-text" id="insightSummary">Loading insights...</div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">😊 Sentiment Breakdown</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="insightSentimentChart"></canvas>
+                    </div>
+                    <div class="sentiment-bars" id="sentimentBars" style="margin-top:1.25rem">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📈 Sentiment Over Time</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="insightTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ━━━ Search Page ━━━ -->
+        <section class="page-section" id="page-search">
+            <div class="page-header">
+                <h2>Search</h2>
+                <p>Search across all processed articles</p>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search articles by keyword, topic, or source..." onkeypress="if(event.key==='Enter') searchArticles()">
+                <button class="btn btn-primary" onclick="searchArticles()">🔍 Search</button>
+            </div>
+
+            <div class="article-list" id="searchResults">
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <p>Enter a search term to find articles</p>
+                </div>
+            </div>
+
+            <div class="pagination" id="searchPagination" style="display:none">
+                <button onclick="searchPage(-1)" id="prevPageBtn">← Previous</button>
+                <span class="current-page" id="pageInfo">Page 1 of 1</span>
+                <button onclick="searchPage(1)" id="nextPageBtn">Next →</button>
+            </div>
+        </section>
+
+        <!-- ━━━ Analytics Page ━━━ -->
+        <section class="page-section" id="page-analytics">
+            <div class="page-header">
+                <h2>Analytics</h2>
+                <p>Comprehensive data analytics and performance metrics</p>
+            </div>
+
+            <div class="stats-grid" id="analyticsStats">
+                <!-- Filled by JS -->
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">📰 Top Sources</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="sourcesChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">🔎 Top Queries</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="queriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📈 Growth Trend</span>
+                    <span class="card-badge badge-blue">Articles/Day</span>
+                </div>
+                <div class="chart-container" style="height:300px">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
